@@ -177,7 +177,9 @@ def obtener_carrito():
         return jsonify({'error': 'Error al obtener el carrito de compras'}), 500
 
 @app.route('/carrito/<int:id>', methods=['DELETE'])
+@app.route('/carrito/<int:id>', methods=['DELETE'])
 def eliminar_del_carrito(id):
+    
     try:
         conn = conectar()
         cursor = conn.cursor()
@@ -188,12 +190,19 @@ def eliminar_del_carrito(id):
 
         cursor.execute("""DELETE FROM carrito WHERE id=?""", (id,))
         conn.commit()
+
+        cursor.execute("""SELECT * FROM productos WHERE codigo=?""", (producto['codigo'],))
+        producto_stock = cursor.fetchone()
+        nuevo_stock = producto_stock['stock'] + producto['cantidad']
+        cursor.execute("""UPDATE productos SET stock=? WHERE codigo=?""", (nuevo_stock, producto['codigo']))
+        conn.commit()
+
         cursor.close()
         conn.close()
         return jsonify({'mensaje': 'Producto eliminado del carrito correctamente'}), 200
     except:
         return jsonify({'error': 'Error al eliminar el producto del carrito'}), 500
-    
+
     
 @app.route('/productos/<int:codigo>', methods=['DELETE'])
 def eliminar_producto(codigo):
