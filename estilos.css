@@ -86,7 +86,7 @@ button:hover {
 a {
     padding: 8px;
     margin:4px;
-    background-color: #fdab13;
+    background-color:#007bff ;
     color: #ffffff;
     border: none;
     border-radius: 5px;
@@ -96,5 +96,5 @@ a {
 }
 
 a:hover {
-    background-color: #cd7b00;
+    background-color:#0056b3 ;
 }
