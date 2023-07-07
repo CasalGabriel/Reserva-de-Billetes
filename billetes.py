@@ -177,9 +177,7 @@ def obtener_carrito():
         return jsonify({'error': 'Error al obtener el carrito de compras'}), 500
 
 @app.route('/carrito/<int:id>', methods=['DELETE'])
-@app.route('/carrito/<int:id>', methods=['DELETE'])
 def eliminar_del_carrito(id):
-    
     try:
         conn = conectar()
         cursor = conn.cursor()
@@ -203,7 +201,6 @@ def eliminar_del_carrito(id):
     except:
         return jsonify({'error': 'Error al eliminar el producto del carrito'}), 500
 
-    
 @app.route('/productos/<int:codigo>', methods=['DELETE'])
 def eliminar_producto(codigo):
     try:
