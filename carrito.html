@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Reserva de Billetes</title>
+    <link rel="stylesheet" href="estilos.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Reservá tus Billetes</h1>
+
+    <h2>Billetes</h2>
+    <table id="productos">
+        <thead>
+            <tr>
+                <th>Número</th>
+                <!--<th>Descripción</th>-->
+                <th>Fracciones</th>
+                <th>Precio</th>
+                <th>Reservar</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Los productos se cargarán dinámicamente aquí -->
+        </tbody>
+    </table>
+
+    <h2>Billetes Reservados</h2>
+    <table id="carrito">
+        <thead>
+            <tr>
+                <th>Número</th>
+                <!--<th>Descripción</th>-->
+                <th>Fracciones</th>
+                <th>Precio</th>
+                <th>Total</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Los productos del carrito se cargarán dinámicamente aquí -->
+        </tbody>
+    </table>
+
+    <script>
+        // Obtener la lista de productos y cargarlos en la tabla
+        $.get("http://localhost:5000/productos", function(data) {
+            var productos = data;
+            var productosTable = $("#productos tbody");
+            productosTable.empty();
+            for (var i = 0; i < productos.length; i++) {
+                var producto = productos[i];
+                var row = "<tr>" +
+                            "<td>" + producto.codigo + "</td>" +
+                            //"<td>" + producto.descripcion + "</td>" +
+                            "<td>" + producto.stock + "</td>" +
+                            "<td>" + producto.precio + "</td>" +
+                            "<td><input type='number' min='1' max='" + producto.stock + "' data-stock='" + producto.stock + "' id='cantidad-" + producto.codigo + "'></td>" +
+                            "<td><button onclick='agregarAlCarrito(" + producto.codigo + ")'>Agregar</button></td>" +
+                          "</tr>";
+                productosTable.append(row);
+            }
+        });
+
+        // Obtener la lista de productos del carrito y cargarlos en la tabla
+        function cargarCarrito() {
+            $.get("http://localhost:5000/carrito", function(data) {
+                var productosCarrito = data;
+                var carritoTable = $("#carrito tbody");
+                carritoTable.empty();
+                for (var i = 0; i < productosCarrito.length; i++) {
+                    var producto = productosCarrito[i];
+                    var total = producto.cantidad * producto.precio;
+                    var row = "<tr>" +
+                                "<td>" + producto.codigo + "</td>" +
+                                //"<td>" + producto.descripcion + "</td>" +
+                                "<td>" + producto.cantidad + "</td>" +
+                                "<td>" + producto.precio + "</td>" +
+                                "<td>" + total + "</td>" +
+                                "<td><button onclick='eliminarDelCarrito(" + producto.id + ")'>Eliminar</button></td>" +
+                              "</tr>";
+                    carritoTable.append(row);
+                }
+            });
+        }
+
+        // Agregar un producto al carrito
+        function agregarAlCarrito(codigo) {
+            var cantidadInput = $("#cantidad-" + codigo);
+            var cantidad = cantidadInput.val();
+            var stock = parseInt(cantidadInput.attr("data-stock"));
+
+            if (cantidad > stock) {
+                alert("La cantidad ingresada excede el stock disponible");
+                return;
+            }
+
+            var data = {
+                codigo: codigo,
+                cantidad: cantidad
+            };
+
+            $.ajax({
+                url: "http://localhost:5000/carrito",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(data),
+                success: function(response) {
+                    alert(response.mensaje);
+                    cantidadInput.val("");
+                    // Restar la cantidad del stock disponible
+                    var stockActualizado = stock - cantidad;
+                    cantidadInput.attr("data-stock", stockActualizado);
+                    cargarCarrito();
+                },
+                error: function(error) {
+                    alert("Error al agregar el producto al carrito");
+                }
+            });
+        }
+
+        // Eliminar un producto del carrito
+        function eliminarDelCarrito(id) {
+            $.ajax({
+                url: "http://localhost:5000/carrito/" + id,
+                type: "DELETE",
+                success: function(response) {
+                    alert(response.mensaje);
+                    cargarCarrito();
+                },
+                error: function(error) {
+                    alert("Error al eliminar el producto del carrito");
+                }
+            });
+        }
+
+        // Cargar inicialmente los productos del carrito
+        cargarCarrito();
+    </script>
+</body>
+</html>

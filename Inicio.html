@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend API de Productos</title>
+    <link rel="stylesheet" href="estilos.css">
+</head>
+ 
+
+<body>
+    <div id="app">
+        <h1>Listado de Productos</h1>
+        <div class="contenedor-centrado">
+            <table>
+                <thead>
+                  <tr>
+                    <th>Número</th>
+                    <th>Fracciones</th>
+                    <th>Precio</th>
+                    
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="producto in productos" :key="producto.codigo">
+                    <td>{{ producto.codigo }}</td>
+                    <td>{{ producto.descripcion }}</td>
+                    <td>{{ producto.stock }}</td>
+                    <td>{{ producto.precio }}</td>
+                    <td>
+                      <button @click="eliminarProducto(producto.codigo)">Eliminar</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+        </div>
+        
+        <h1>Consultar Producto</h1>
+        <div class="contenedor-centrado">
+            <form @submit.prevent="consultarProducto">
+                <label for="consultaCodigo">Número de Billete</label>
+                <input type="number" id="consultaCodigo" v-model="consultaCodigo" required>
+                <button type="submit">Consultar</button>
+                <div v-if="consultaResultado">{{ consultaResultado }}</div>
+            </form>            
+        </div>
+        
+
+        <h1>Alta Billete</h1>
+        <form @submit.prevent="altaProducto">
+            <label for="altaCodigo">Número:</label>
+            <input type="number" id="altaCodigo" v-model="altaCodigo" required>
+            
+            <label for="altaStock">Fracciones:</label>
+            <input type="number" id="altaStock" v-model="altaStock" required>
+            <label for="altaPrecio">Precio:</label>
+            <input type="number" step="0.01" id="altaPrecio" v-model="altaPrecio" required>
+            <button type="submit">Dar de Alta</button>
+            <div v-if="altaResultado">{{ altaResultado }}</div>
+        </form>
+
+        <h1>Modificar Producto</h1>
+        <form @submit.prevent="modificarProducto">
+            <label for="modificarCodigo">Numero de Billete:</label>
+            <input type="number" id="modificarCodigo" v-model="modificarCodigo" required>
+            
+            <label for="modificarNuevoStock">Nuevo Stock:</label>
+            <input type="number" id="modificarNuevoStock" v-model="modificarNuevoStock" required>
+            <label for="modificarNuevoPrecio">Nuevo Precio:</label>
+            <input type="number" step="0.01" id="modificarNuevoPrecio" v-model="modificarNuevoPrecio" required>
+            <button type="submit">Modificar</button>
+            <div v-if="modificarResultado">{{ modificarResultado }}</div>
+        </form>
+    </div>
+
+
+    <script src="https://unpkg.com/vue@next"></script>
+    <script>
+        const URL = "http://127.0.0.1:5000"
+        const app = Vue.createApp({
+          data() {
+            return {
+              productos: [],
+              consultaCodigo: '',
+              consultaResultado: '',
+              altaResultado: '',
+              modificarResultado: '',
+              altaCodigo: '',
+              altaDescripcion: '',
+              altaStock: '',
+              altaPrecio: '',
+              modificarCodigo: '',
+              modificarNuevaDescripcion: '',
+              modificarNuevoStock: '',
+              modificarNuevoPrecio: ''
+            };
+          },
+          methods: {
+            consultarProducto() {
+              fetch(URL + `/productos/${this.consultaCodigo}`)
+                .then(response => response.json())
+                .then(producto => {
+                  if (producto) {
+                    this.consultaResultado = `Código: ${producto.codigo}, Descripción: ${producto.descripcion}, Stock: ${producto.stock}, Precio: ${producto.precio}`;
+                  } else {
+                    this.consultaResultado = 'Producto no encontrado';
+                  }
+                })
+                .catch(error => {
+                  console.error(error);
+                  this.consultaResultado = 'Error al realizar la consulta';
+                });
+            },
+            altaProducto() {
+              fetch(URL + '/productos', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  codigo: this.altaCodigo,
+                  descripcion: this.altaDescripcion,
+                  stock: this.altaStock,
+                  precio: this.altaPrecio
+                })
+              })
+                .then(response => {
+                  if (response.ok) {
+                    this.altaCodigo = '';
+                    this.altaDescripcion = '';
+                    this.altaStock = '';
+                    this.altaPrecio = '';
+                    this.listarProductos();
+                  } else {
+                    this.altaResultado = 'Alta no efectuada';
+                  }
+                })
+                .catch(error => {
+                  console.error(error);
+                });
+            },
+            modificarProducto() {
+              fetch(URL + `/productos/${this.modificarCodigo}`, {
+                method: 'PUT',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  descripcion: this.modificarNuevaDescripcion,
+                  stock: this.modificarNuevoStock,
+                  precio: this.modificarNuevoPrecio
+                })
+              })
+                .then(response => {
+                  if (response.ok) {
+                    this.modificarCodigo = '';
+                    this.modificarNuevaDescripcion = '';
+                    this.modificarNuevoStock = '';
+                    this.modificarNuevoPrecio = '';
+                    this.listarProductos();
+                    this.modificarResultado = 'Modificación realizada';
+                  } else {
+                    this.modificarResultado = 'Modificación no efectuada';
+                  }
+                })
+                .catch(error => {
+                  console.error(error);
+                });
+            },
+            listarProductos() {
+              fetch(URL + '/productos')
+                .then(response => response.json())
+                .then(productos => {
+                  this.productos = productos;
+                })
+                .catch(error => {
+                  console.error(error);
+                });
+            },
+            eliminarProducto(codigo) {
+              fetch(URL + `/productos/${codigo}`, {
+                method: 'DELETE'
+              })
+                .then(response => {
+                  if (response.ok) {
+                    this.listarProductos();
+                  } else {
+                    console.log('Error al eliminar el producto');
+                  }
+                })
+                .catch(error => {
+                  console.error(error);
+                });
+            }
+          },
+          mounted() {
+            this.listarProductos();
+          }
+        });
+
+        app.mount('#app');  
+    </script>
+</body>
+
+</html>
