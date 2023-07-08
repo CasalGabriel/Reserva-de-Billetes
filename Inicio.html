@@ -11,7 +11,7 @@
 
 <body>
     <div id="app">
-        <h1>Listado de Productos</h1>
+        <h1>Listado de Billetes</h1>
         <div class="contenedor-centrado">
             <table>
                 <thead>
@@ -59,7 +59,7 @@
             <div v-if="altaResultado">{{ altaResultado }}</div>
         </form>
 
-        <h1>Modificar Producto</h1>
+        <h1>Modificar Billete</h1>
         <form @submit.prevent="modificarProducto">
             <label for="modificarCodigo">Numero de Billete:</label>
             <input type="number" id="modificarCodigo" v-model="modificarCodigo" required>
