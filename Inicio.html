@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
@@ -36,7 +36,7 @@
               </table>
         </div>
         
-        <h1>Consultar Producto</h1>
+        <h1>Consultar Billetes</h1>
         <div class="contenedor-centrado">
             <form @submit.prevent="consultarProducto">
                 <label for="consultaCodigo">Número de Billete</label>
@@ -47,7 +47,7 @@
         </div>
         
 
-        <h1>Alta Billete</h1>
+        <h1>Alta Billetes</h1>
         <form @submit.prevent="altaProducto">
             <label for="altaCodigo">Número:</label>
             <input type="number" id="altaCodigo" v-model="altaCodigo" required>
